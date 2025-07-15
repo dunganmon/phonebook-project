@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>   
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập</title>
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Arial', sans-serif;
+}
+
+.auth-container {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-header h1 {
+    color: #2f4a66;
+    font-size: 24px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.auth-header p {
+    color: #555;
+    font-size: 14px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background: white;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #2f4a66;
+}
+
+.form-group label {
+    position: absolute;
+    top: -8px;
+    left: 10px;
+    background: white;
+    color: #2f4a66;
+    font-size: 12px;
+    padding: 0 4px;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: #2f4a66;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.submit-btn:hover {
+    background: #1e3348;
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.auth-links a {
+    color: #2f4a66;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+.message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    text-align: center;
+    display: none;
+    font-weight: 500;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.icon {
+    font-size: 36px;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 480px) {
+    .auth-container {
+        margin: 20px;
+        padding: 20px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="icon">🔐</div>
+            <h1>Đăng Nhập</h1>
+            <p>Chào mừng trở lại!</p>
+        </div>
+        
+        <div id="message" class="message"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="text" id="username" name="username" required>
+                <label for="username">Tên đăng nhập</label>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" id="password" name="password" required>
+                <label for="password">Mật khẩu</label>
+            </div>
+            
+            <button type="submit" class="submit-btn">Đăng Nhập</button>
+        </form>
+        
+        <div class="auth-links">
+            <p>Chưa có tài khoản? <a href="register.html">Đăng ký</a></p>
+        </div>
+    </div>
+    
+    <script>
+      const loginForm = document.getElementById('loginForm');
+const messageDiv = document.getElementById('message');
+
+function showMessage(text, type) {
+    messageDiv.textContent = text;
+    messageDiv.className = `message ${type}`;
+    messageDiv.style.display = 'block';
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 3000);
+}
+
+function saveAuth(username, password) {
+    const authString = btoa(username + ':' + password);
+    sessionStorage.setItem('auth', authString);
+    sessionStorage.setItem('username', username);
+}
+
+function checkAuth() {
+    if (sessionStorage.getItem('auth')) {
+        window.location.href = 'index.html';
+    }
+}
+
+checkAuth();
+
+loginForm.addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    try {
+        const res = await fetch('http://localhost:8080/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.status === 'success') {
+            saveAuth(username, password);
+            showMessage('Đăng nhập thành công!', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        } else {
+            showMessage(data.message || 'Tên đăng nhập hoặc mật khẩu không đúng!', 'error');
+        }
+    } catch (error) {
+        showMessage('Lỗi kết nối máy chủ', 'error');
+    }
+});
+
+    </script>
+</body>
+</html>
