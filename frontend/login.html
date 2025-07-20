@@ -183,9 +183,8 @@ function showMessage(text, type) {
     }, 3000);
 }
 
-function saveAuth(username, password) {
-    const authString = btoa(username + ':' + password);
-    sessionStorage.setItem('auth', authString);
+function saveAuth(token, username) {
+    sessionStorage.setItem('jwt_token', token);
     sessionStorage.setItem('username', username);
 }
 
@@ -212,8 +211,8 @@ loginForm.addEventListener('submit', async function(event) {
 
         const data = await res.json();
 
-        if (res.ok && data.status === 'success') {
-            saveAuth(username, password);
+        if (res.ok && data.status === 'success' && data.token) {
+            saveAuth(data.token, data.user.username);
             showMessage('Đăng nhập thành công!', 'success');
             setTimeout(() => {
                 window.location.href = 'index.html';

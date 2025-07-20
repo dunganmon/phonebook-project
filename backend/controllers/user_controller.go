@@ -6,8 +6,10 @@ import (
 	"TODO/models"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
 	"net/http"
+	"time"
 )
 
 func Register(c *gin.Context) {
@@ -29,6 +31,8 @@ func Register(c *gin.Context) {
 		},
 	})
 }
+
+var jwtSecret = []byte("YOUR_SECRET_KEY")
 
 func Login(c *gin.Context) {
 	var userReq dtos.UserLoginRequest
@@ -59,10 +63,24 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	var token = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id":  user.ID,
+		"username": user.Username,
+		"exp":      time.Now().Add(time.Hour * 6).Unix(),
+	})
+	tokenString, err := token.SignedString(jwtSecret)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Lỗi hệ thống"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status": "success",
-		"data": gin.H{
-			"user": user,
+		"token":  tokenString,
+		"user": gin.H{
+			"id":        user.ID,
+			"username":  user.Username,
+			"full_name": user.FullName,
 		},
 	})
 }

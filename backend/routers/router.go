@@ -14,11 +14,12 @@ func Init(router *gin.Engine) {
 	}
 
 	auth := router.Group("/api")
+	auth.Use(middlewares.JWTAuth())
 	{
-		auth.POST("profiles", middlewares.CheckLogin(), controllers.GetUserProfile)
-		auth.GET("/contacts", middlewares.CheckLogin(), controllers.GetContacts)
-		auth.POST("/contacts", middlewares.CheckLogin(), controllers.AddContact)
-		auth.DELETE("/contacts/:id", middlewares.CheckLogin(), middlewares.CheckOwnContact(), controllers.DeleteContact)
-		auth.PUT("/contacts/:id", middlewares.CheckLogin(), middlewares.CheckOwnContact(), controllers.EditContact)
+		auth.POST("profiles", controllers.GetUserProfile)
+		auth.GET("/contacts", controllers.GetContacts)
+		auth.POST("/contacts", controllers.AddContact)
+		auth.DELETE("/contacts/:id", middlewares.CheckOwnContact(), controllers.DeleteContact)
+		auth.PUT("/contacts/:id", middlewares.CheckOwnContact(), controllers.EditContact)
 	}
 }

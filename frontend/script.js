@@ -1,23 +1,22 @@
 
 function getAuthHeader() {
-    const auth = sessionStorage.getItem('auth');
-    if (!auth) {
+    const token = sessionStorage.getItem('jwt_token');
+    if (!token) {
         window.location.href = 'login.html';
         return null;
     }
-    return { 'Authorization': 'Basic ' + auth };
+    return { 'Authorization': 'Bearer ' + token };
 }
 
 
 function checkAuth() {
-    const auth = sessionStorage.getItem('auth');
-    if (!auth) {
+    const token = sessionStorage.getItem('jwt_token');
+    if (!token) {
         window.location.href = 'login.html';
         return null;
     }
     return sessionStorage.getItem('username');
 }
-
 
 function loadUserName() {
     const username = checkAuth();
